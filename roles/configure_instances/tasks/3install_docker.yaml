@@ -1,0 +1,40 @@
+---
+- name: install packages to set up stable repo
+  yum:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+    - yum-utils
+    - lvm2
+    - device-mapper-persistent-data
+    - python-pip
+    - amazon-linux-extras
+
+- name: add repos
+  shell: yum-config-manager --enable extras
+
+- name: Enable Some packages from amazon-linux-extras packages
+  shell: "amazon-linux-extras enable python3.8 docker"
+
+- name: install docker
+  yum:
+    name: docker
+    state: latest
+
+- name: start the docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: adding user to docker group
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
+
+- name: install module named docker
+  pip:
+    name: docker-py
+  #  executable: pip3

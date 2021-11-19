@@ -1,0 +1,78 @@
+---
+
+- name: Create security group
+  ec2_group:
+    name: my-group
+    description: test
+    vpc_id: vpc-d4f5aabc
+    region: "{{ aws_region }}"
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 22
+          - 5432
+        cidr_ip: 0.0.0.0/0
+  register: sec_group
+  
+- name: Launching database server 
+  amazon.aws.ec2:
+    key_name: "{{ my_key }}"
+    instance_type: t2.micro
+    image: ami-074771aa49ab046e7  
+    region: "{{ aws_region }}"
+    wait: true
+    group_id: "{{ sec_group.group_id }}"
+    exact_count: 1
+    count_tag:
+      Name: dbserver
+    instance_tags:
+      Name: dbserver
+    vpc_subnet_id: "{{ vpc }}"
+    assign_public_ip: yes
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+
+- name: Launching server for app.py
+  amazon.aws.ec2:
+    key_name: "{{ my_key }}"
+    instance_type: t2.micro
+    image: ami-074771aa49ab046e7
+    region: "{{ aws_region }}"
+    wait: true
+    group_id: "{{ sec_group.group_id }}"      
+    exact_count: 1
+    count_tag:
+      Name: app
+    instance_tags:
+      Name: app
+    vpc_subnet_id: "{{ vpc }}"
+    assign_public_ip: yes
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+
+- name: Gather facts from db_instance
+  ec2_instance_facts:
+    filters:
+      "tag:Name": dbserver
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+    region: "{{ aws_region }}"
+  register: ec2_db
+     
+- name: Change app.py to create right Docker image
+  lineinfile:
+    path: ~/project/python-postgres-user-registration/app.py
+    regexp: ', host=\"'
+    line: 'Database.initialise(database="{{ db }}", user="{{ db_user }}", password="{{ db_pass }}", host="{{ item }}")'
+  with_items:
+    - "{{ ec2_db | json_query('instances[*].private_ip_address')}}"
+
+- name: Build/push image
+  docker_image:
+    name: dvolnistiy/postgres-user-registration
+    path: ~/project/python-postgres-user-registration
+    state: present
+    source: build
+    push: yes

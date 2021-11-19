@@ -1,0 +1,3 @@
+---
+- name: setup postgres database
+  include_tasks: 4setup_dbase.yaml

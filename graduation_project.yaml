@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  vars_files:
+    - ./roles/launch_ec2/vars/secret_file.yaml
+    - ./roles/launch_ec2/vars/main.yml
+  roles:
+    - launch_ec2
+
+- hosts: all 
+  roles:
+  - { role: configure_instances, become: yes }
+
+- hosts: tag_Name_dbserver
+  vars_files:
+    - ./roles/db_conf/vars/secret_file.yaml
+    - ./roles/db_conf/vars/main.yml
+  roles:
+    - db_conf
+
+- hosts: tag_Name_app
+  roles:
+    - app_conf

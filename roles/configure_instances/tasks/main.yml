@@ -1,0 +1,7 @@
+---
+# tasks file for configure_instances
+- name: Deploy SSH keys
+  include_tasks: 2deploy_ssh.yaml
+
+- name: Install and configure docker
+  include_tasks: 3install_docker.yaml

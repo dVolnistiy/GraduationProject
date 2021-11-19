@@ -1,0 +1,4 @@
+---
+db_user: "postgres"
+db_pass: "1234"
+db: "mydatabase"
