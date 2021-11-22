@@ -27,7 +27,7 @@
   command: "docker inspect --format '{''{ .NetworkSettings.IPAddress }''}' postgres"
   register: db_ip_address
 
-- name: wait while dbsever is RASKOCHEGARITSA
+- name: wait while dbserver is RASKOCHEGARITSA
   wait_for:
     host: "{{ db_ip_address.stdout }}"
     port: 5432

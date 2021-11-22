@@ -1,5 +1,4 @@
 ---
-
 - name: Create security group
   ec2_group:
     name: my-group
@@ -15,14 +14,13 @@
           - 5432
         cidr_ip: 0.0.0.0/0
   register: sec_group
-  
-- name: Launching database server 
+
+- name: Launching database instance
   amazon.aws.ec2:
     key_name: "{{ my_key }}"
     instance_type: t2.micro
-    image: ami-074771aa49ab046e7  
+    image: ami-074771aa49ab046e7
     region: "{{ aws_region }}"
-    wait: true
     group_id: "{{ sec_group.group_id }}"
     exact_count: 1
     count_tag:
@@ -30,18 +28,19 @@
     instance_tags:
       Name: dbserver
     vpc_subnet_id: "{{ vpc }}"
+    wait: yes
     assign_public_ip: yes
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
 
-- name: Launching server for app.py
+- name: Launching instance for app.py
   amazon.aws.ec2:
     key_name: "{{ my_key }}"
     instance_type: t2.micro
     image: ami-074771aa49ab046e7
     region: "{{ aws_region }}"
-    wait: true
-    group_id: "{{ sec_group.group_id }}"      
+    wait: yes
+    group_id: "{{ sec_group.group_id }}"
     exact_count: 1
     count_tag:
       Name: app
@@ -51,6 +50,13 @@
     assign_public_ip: yes
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
+
+- name: Wait to completely provision instances
+  pause: 
+    minutes: 2
+
+- name: Refresh Inventory
+  meta: refresh_inventory
 
 - name: Gather facts from db_instance
   ec2_instance_facts:
@@ -60,7 +66,7 @@
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
   register: ec2_db
-     
+
 - name: Change app.py to create right Docker image
   lineinfile:
     path: ~/project/python-postgres-user-registration/app.py
@@ -72,7 +78,10 @@
 - name: Build/push image
   docker_image:
     name: dvolnistiy/postgres-user-registration
-    path: ~/project/python-postgres-user-registration
+    build:
+      path: ~/project/python-postgres-user-registration
     state: present
+    force_source: yes
+    tag: "{{ docker_image_version }}"
     source: build
-    push: yes
+    push: true

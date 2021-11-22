@@ -38,3 +38,6 @@
   pip:
     name: docker-py
   #  executable: pip3
+
+- name: Reset connection so docker group is picked up
+  meta: reset_connection
