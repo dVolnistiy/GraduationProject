@@ -3,7 +3,7 @@
   yum:
     name: "{{ item }}"
     state: latest
-    update_cache: yes
+    update_cache: true
   loop:
     - yum-utils
     - lvm2
@@ -26,18 +26,17 @@
   service:
     name: docker
     state: started
-    enabled: yes
+    enabled: true
 
 - name: adding user to docker group
   user:
     name: ec2-user
     groups: docker
-    append: yes
+    append: true
 
 - name: install module named docker
   pip:
     name: docker-py
-  #  executable: pip3
 
 - name: Reset connection so docker group is picked up
   meta: reset_connection

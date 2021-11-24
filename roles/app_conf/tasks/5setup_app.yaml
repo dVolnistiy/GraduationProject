@@ -2,6 +2,6 @@
 - name: start app.py in container on second remote host
   docker_container:
     name: app.py
-    image: dvolnistiy/postgres-user-registration:{{ docker_image_version }}
+    image: dvolnistiy/postgres-user-registration
     pull: true
     recreate: true
