@@ -2,7 +2,8 @@
 - name: Create security group
   ec2_group:
     name: my-group
-    description: test
+    description: group for graduation project
+    state: present
     vpc_id: vpc-d4f5aabc
     region: "{{ aws_region }}"
     aws_access_key: "{{ vault_access_key }}"
@@ -28,8 +29,8 @@
     instance_tags:
       Name: dbserver
     vpc_subnet_id: "{{ vpc }}"
-    wait: yes
     assign_public_ip: yes
+    wait: yes
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
 
@@ -51,9 +52,9 @@
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
 
-- name: Wait to completely provision instances
+- name: Wait to completely launch instances
   pause: 
-    minutes: 2
+    seconds: 45
 
 - name: Refresh Inventory
   meta: refresh_inventory
@@ -80,8 +81,8 @@
     name: dvolnistiy/postgres-user-registration
     build:
       path: ~/project/python-postgres-user-registration
+      nocache: true
     state: present
-    force_source: yes
-    tag: "{{ docker_image_version }}"
+    force_source: true
     source: build
     push: true
