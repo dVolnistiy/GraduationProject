@@ -1,0 +1,76 @@
+---
+- name: work with rds
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - name: include vars1
+    include_vars: ./roles/launch_ec2/vars/secret_file.yaml
+
+  - name: include vars2
+    include_vars: ./roles/db_conf/vars/secret_file.yaml
+
+  - name: include vars3
+    include_vars: ./roles/db_conf/vars/main.yaml
+
+  - name: create rds instance
+    community.aws.rds:
+      command: create
+      instance_name: "{{ db }}"
+      db_name: "{{ db }}"
+      db_engine: postgres
+      engine_version: 9.6.20
+      size: 10
+      instance_type: db.t2.micro
+      username: "{{ db_user }}"
+      password: "{{ db_pass }}"
+      backup_retention: 0
+      port: 5432
+      publicly_accessible: true
+      subnet: default-vpc-d4f5aabc
+      vpc_security_groups:
+        - sg-0bad191055634fbfa 
+      aws_access_key: "{{ vault_access_key }}"
+      aws_secret_key: "{{ vault_secret_key }}"
+      region: "{{ aws_region }}"
+      wait: true
+      wait_timeout: 600
+
+  - name: Get facts about an instance
+    community.aws.rds:
+      command: facts
+      instance_name: "{{ db }}"
+      aws_access_key: "{{ vault_access_key }}"
+      aws_secret_key: "{{ vault_secret_key }}"
+      region: "{{ aws_region }}"
+    register: facts
+
+  - name: execute script
+    command: "psql {{ db }} -p 5432 -h {{ facts.instance.endpoint }} -f  ~/project/python-postgres-user-registration/postgres/schema.sql -U postgres"
+    environment:
+      PGPASSWORD: '{{db_pass}}'
+    register: sql_response
+    
+  - name: Change app.py to create right Docker image
+    lineinfile:
+      path: ~/project/python-postgres-user-registration/app.py
+      regexp: ', host=\"'
+      line: 'Database.initialise(database="{{ db }}", user="{{ db_user }}",
+             password="{{ db_pass }}", host="{{ item }}")'
+    with_items:
+      - "{{ facts.instance.endpoint }}"
+    register: image
+
+  - name: Build/push image
+    docker_image:
+      name: dvolnistiy/postgres-user-registration
+      build:
+        path: ~/project/python-postgres-user-registration
+        nocache: true
+      state: present
+      force_source: true
+      source: build 
+      push: true
+    when: image.changed
+
+
