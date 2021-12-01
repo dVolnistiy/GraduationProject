@@ -1,0 +1,4 @@
+---
+# tasks file for launch_ecs_cluster.yaml
+- name: start ecs cluster
+  include_tasks: launch_ecs_cluster.yaml

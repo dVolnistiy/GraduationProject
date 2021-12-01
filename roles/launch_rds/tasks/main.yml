@@ -1,0 +1,3 @@
+---
+- name: start rds instance with postgres
+  include_tasks: rds.yaml
