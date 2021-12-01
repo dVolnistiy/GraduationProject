@@ -1,0 +1,27 @@
+---
+- name: Delete rds instance
+  community.aws.rds:
+    command: delete
+    instance_name: "{{ db }}"
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+    region: "{{ aws_region }}"
+
+- name: Stop EC2 instance to get her instance_ids
+  ec2:
+    instance_tags:
+      class: application
+    state: stopped
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+    region: "{{ aws_region }}"
+  register: GG
+
+- name: Really Destroy instance
+  ec2:
+    state: absent
+    instance_ids: "{{ GG.instance_ids }}"
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+    region: "{{ aws_region }}"
+    wait: true
