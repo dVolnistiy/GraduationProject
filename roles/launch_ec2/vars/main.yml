@@ -1,5 +1,0 @@
----
-ansible_user: ec2-user
-db_user: "postgres"
-db: "mydatabase"
-
