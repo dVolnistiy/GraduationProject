@@ -53,7 +53,7 @@
   ecs_taskdefinition:
     containers:
       - name: app
-        image: dvolnistiy/postgres-user-registration
+        image: "{{ image_name }}"
         cpu: 10
         memory: 200
     family: app

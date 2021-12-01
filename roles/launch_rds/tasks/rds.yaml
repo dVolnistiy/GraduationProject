@@ -51,7 +51,7 @@
 
 - name: Build/push image
   docker_image:
-    name: dvolnistiy/postgres-user-registration
+    name: "{{ image_name }}"
     build:
       path: ~/project/python-postgres-user-registration
       nocache: true
