@@ -4,3 +4,5 @@ db: "mydatabase"
 db_user: "postgres"
 aws_iam: EC2_to_ECS
 ecs_cluster_name: project
+
+image_name: dvolnistiy/postgres-user-registration
