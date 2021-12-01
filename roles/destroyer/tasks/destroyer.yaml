@@ -7,7 +7,7 @@
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
 
-- name: Stop EC2 instance to get her instance_ids
+- name: Stop EC2 instance to get it id
   ec2:
     instance_tags:
       class: application
@@ -15,7 +15,12 @@
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
+    wait: true
   register: GG
+
+- name: get id
+  debug:
+    var=GG
 
 - name: Really Destroy instance
   ec2:
@@ -25,3 +30,19 @@
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
     wait: true
+  when: GG.changed
+  
+- name: Get container_instance
+  shell: "aws ecs list-container-instances --cluster {{ ecs_cluster_name }} | grep /{{ ecs_cluster_name }}/"
+  register: info
+
+- name: Deregister container_instance from ECS
+  command: "aws ecs deregister-container-instance --cluster {{ ecs_cluster_name }} --container-instance {{ info.stdout }}"
+
+- name: Destroy cluster
+  ecs_cluster:
+    name: "{{ ecs_cluster_name }}"
+    state: absent
+    aws_access_key: "{{ vault_access_key }}"
+    aws_secret_key: "{{ vault_secret_key }}"
+    region: "{{ aws_region }}"
