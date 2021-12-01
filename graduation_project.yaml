@@ -1,8 +1,8 @@
 ---
 - hosts: localhost
   vars_files:
-    - ./roles/launch_ec2/vars/secret_file.yaml
-    - ./roles/launch_ec2/vars/main.yaml
+    - ./roles/group_vars/all.yaml
+    - ./roles/group_vars/secret_file.yaml
   roles:
     - launch_ec2
 
@@ -12,8 +12,8 @@
 
 - hosts: tag_Name_dbserver
   vars_files:
-    - ./roles/db_conf/vars/secret_file.yaml
-    - ./roles/db_conf/vars/main.yaml
+    - ./roles/group_vars/secret_file.yaml
+    - ./roles/group_vars/all.yaml
   roles:
     - db_conf
 

@@ -1,0 +1,6 @@
+---
+ansible_user: ec2-user
+db: "mydatabase"
+db_user: "postgres"
+aws_iam: EC2_to_ECS
+ecs_cluster_name: project
