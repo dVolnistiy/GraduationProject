@@ -29,7 +29,6 @@
       class: application
     instance_tags:
       class: application
-    assign_public_ip: true
     instance_profile_name: "{{ aws_iam }}"
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
@@ -39,12 +38,13 @@
                 sudo chown -R ec2-user /etc/ecs &&
                 echo ECS_CLUSTER={{cluster_var.cluster.clusterName}} >> /etc/ecs/ecs.config
 
+
 - name: Wait for instance join to ECS cluster
   ecs_cluster:
     name: "{{ ecs_cluster_name }}"
     state: has_instances
     delay: 10
-    repeat: 20
+    repeat: 30
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"

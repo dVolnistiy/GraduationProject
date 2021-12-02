@@ -1,26 +1,50 @@
 ---
+# - name: create rds instance
+#   community.aws.rds:
+#     command: create
+#     instance_name: "{{ db }}"
+#     db_name: "{{ db }}"
+#     db_engine: postgres
+#     engine_version: 9.6.20
+#     size: 10
+#     instance_type: db.t2.micro
+#     username: "{{ db_user }}"
+#     password: "{{ db_pass }}"
+#     backup_retention: 0
+#     port: 5432
+#     publicly_accessible: true
+#     subnet: default-vpc-d4f5aabc
+#     vpc_security_groups:
+#       - sg-0bad191055634fbfa
+#     aws_access_key: "{{ vault_access_key }}"
+#     aws_secret_key: "{{ vault_secret_key }}"
+#     region: "{{ aws_region }}"
+#     wait: true
+#     wait_timeout: 600
+
 - name: create rds instance
-  community.aws.rds:
-    command: create
-    instance_name: "{{ db }}"
-    db_name: "{{ db }}"
-    db_engine: postgres
+  no_log: true
+  rds_instance:
+    state: present
+    engine: postgres
     engine_version: 9.6.20
-    size: 10
-    instance_type: db.t2.micro
+    db_instance_identifier: "{{ db }}"
+    db_name: "{{ db }}"
+    db_instance_class: db.t2.micro
+    allocated_storage: 10
     username: "{{ db_user }}"
     password: "{{ db_pass }}"
-    backup_retention: 0
     port: 5432
-    publicly_accessible: true
-    subnet: default-vpc-d4f5aabc
-    vpc_security_groups:
+    vpc_security_group_ids:
       - sg-0bad191055634fbfa
+    # db_subnet_group_name:
+    #   - vpc-d4f5aabc
+    skip_final_snapshot: true
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
     wait: true
-    wait_timeout: 600
+
 
 - name: Get facts about an instance
   community.aws.rds:

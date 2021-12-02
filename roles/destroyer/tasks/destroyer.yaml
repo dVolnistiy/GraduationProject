@@ -1,11 +1,14 @@
 ---
 - name: Delete rds instance
-  community.aws.rds:
-    command: delete
-    instance_name: "{{ db }}"
+  rds_instance:
+    state: absent
+    db_instance_identifier: "{{ db }}"
+    #instance_name: "{{ db }}"
+    skip_final_snapshot: true
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
+    wait: true
 
 - name: Stop EC2 instance to get it id
   ec2:
@@ -16,28 +19,26 @@
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
     wait: true
-  register: GG
+  register: F
 
-- name: get id
-  debug:
-    var=GG
-
-- name: Really Destroy instance
+- name: Destroy EC2 instance
   ec2:
     state: absent
-    instance_ids: "{{ GG.instance_ids }}"
+    instance_ids: "{{ F.instance_ids }}"
     aws_access_key: "{{ vault_access_key }}"
     aws_secret_key: "{{ vault_secret_key }}"
     region: "{{ aws_region }}"
     wait: true
-  when: GG.changed
+  when: F.changed
   
 - name: Get container_instance
   shell: "aws ecs list-container-instances --cluster {{ ecs_cluster_name }} | grep /{{ ecs_cluster_name }}/"
   register: info
+  ignore_errors: true
 
 - name: Deregister container_instance from ECS
   command: "aws ecs deregister-container-instance --cluster {{ ecs_cluster_name }} --container-instance {{ info.stdout }}"
+  ignore_errors: true
 
 - name: Destroy cluster
   ecs_cluster:
