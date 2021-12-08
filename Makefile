@@ -20,11 +20,11 @@ lint-yaml: ## Perform YAML lint
 
 .PHONY: ansible-check 
 check: ## Syntax check
-	ansible-playbook ecs_graduation_project.yaml --syntax-check --ask-vault-pass
+	ansible-playbook ecs_graduation_project.yaml destroyer.yaml  --syntax-check --ask-vault-pass
 
 .PHONY: start 
 start: ## Start project
-	ansible-playbook ecs_graduation_project.yaml --ask-vault-pass --key-file my-key.pem
+	ansible-playbook ecs_graduation_project.yaml --ask-vault-pass --key-file my-key.pem --extra-vars "endpoint='${aws_db_instance.mydatabase.address}'"
 
 .PHONY: destroy
 destroy: ## Destroy all 

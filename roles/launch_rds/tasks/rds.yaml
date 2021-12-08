@@ -1,42 +1,41 @@
 ---
-- name: create rds instance
-  no_log: true
-  rds_instance:
-    state: present
-    engine: postgres
-    engine_version: 9.6.20
-    db_instance_identifier: "{{ db }}"
-    db_name: "{{ db }}"
-    db_instance_class: db.t2.micro
-    allocated_storage: 10
-    username: "{{ db_user }}"
-    password: "{{ db_pass }}"
-    port: 5432
-    vpc_security_group_ids:
-      - sg-0bad191055634fbfa
-    skip_final_snapshot: true
-    aws_access_key: "{{ vault_access_key }}"
-    aws_secret_key: "{{ vault_secret_key }}"
-    region: "{{ aws_region }}"
-    wait: true
+# - name: create rds instance
+#   no_log: true
+#   rds_instance:
+#     state: present
+#     engine: postgres
+#     engine_version: 9.6.20
+#     db_instance_identifier: "{{ db }}"
+#     db_name: "{{ db }}"
+#     db_instance_class: db.t2.micro
+#     allocated_storage: 10
+#     username: "{{ db_user }}"
+#     password: "{{ db_pass }}"
+#     port: 5432
+#     vpc_security_group_ids:
+#       - sg-0bad191055634fbfa
+#     skip_final_snapshot: true
+#     aws_access_key: "{{ vault_access_key }}"
+#     aws_secret_key: "{{ vault_secret_key }}"
+#     region: "{{ aws_region }}"
+#     wait: true
 
 
-- name: Get facts about an instance
-  community.aws.rds:
-    command: facts
-    instance_name: "{{ db }}"
-    aws_access_key: "{{ vault_access_key }}"
-    aws_secret_key: "{{ vault_secret_key }}"
-    region: "{{ aws_region }}"
-  register: info
+# - name: Get facts about an instance
+#   community.aws.rds:
+#     command: facts
+#     instance_name: "{{ db }}"
+#     aws_access_key: "{{ vault_access_key }}"
+#     aws_secret_key: "{{ vault_secret_key }}"
+#     region: "{{ aws_region }}"
+#   register: info
 
 - name: execute script
-  command: "psql {{ db }} -p 5432 -h {{ info.instance.endpoint }}
+  command: "psql {{ db }} -p 5432 -h {{ endpoint }}
             -f  ~/project/python-postgres-user-registration/postgres/schema.sql
             -U postgres"
   environment:
     PGPASSWORD: '{{db_pass}}'
-  register: sql_response
 
 - name: Change app.py to create right Docker image
   lineinfile:
@@ -45,7 +44,7 @@
     line: 'Database.initialise(database="{{ db }}", user="{{ db_user }}",
            password="{{ db_pass }}", host="{{ item }}")'
   with_items:
-    - "{{ info.instance.endpoint }}"
+    - "{{ endpoint }}"
   register: image
 
 - name: Build/push image
