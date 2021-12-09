@@ -8,6 +8,7 @@ resource "aws_db_instance" "mydatabase" {
   allocated_storage      = 10
   identifier             = var.db
   engine                 = "postgres"
+  engine_version         = "9.6.20"
   instance_class         = "db.t2.micro"
   port                   = 5432
   vpc_security_group_ids = ["sg-0bad191055634fbfa"]
@@ -18,7 +19,7 @@ resource "aws_db_instance" "mydatabase" {
   skip_final_snapshot    = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_rds.yaml --ask-vault-pass --key-file my-key.pem --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
+    command = "ansible-playbook role_for_rds.yaml --vault-password-file ~./vault_pass.txt --key-file my-key.pem --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
   }
 }
 
@@ -60,7 +61,7 @@ echo ECS_CLUSTER="${var.ecs_cluster_name}" >> /etc/ecs/ecs.config
   ]
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_ecs.yaml --ask-vault-pass --key-file my-key.pem"
+    command = "ansible-playbook role_for_ecs.yaml --vault-password-file ~./vault_pass.txt --key-file my-key.pem"
   }
 }
 
