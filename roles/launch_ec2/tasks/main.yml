@@ -1,5 +1,0 @@
----
-# tasks file for launch_ec2
-- name: start ec2 instances
-  include_tasks: 1launch_AWS_inst.yaml
-

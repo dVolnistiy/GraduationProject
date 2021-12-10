@@ -1,6 +1,0 @@
----
-- name: deploy SSH key
-  authorized_key:
-    user: ec2-user
-    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-    state: present

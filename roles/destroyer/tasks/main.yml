@@ -1,4 +1,0 @@
----
-# tasks file for destroyer
-- name: Velikoe proektopadenie
-  include_tasks: destroyer.yaml

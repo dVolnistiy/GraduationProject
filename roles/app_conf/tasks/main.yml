@@ -1,4 +1,0 @@
----
-
-- name: setup application
-  include_tasks: 5setup_app.yaml
