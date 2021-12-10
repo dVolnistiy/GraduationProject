@@ -1,7 +1,0 @@
----
-- hosts: localhost
-  vars_files:
-    - ./roles/group_vars/all.yaml
-    - ./roles/group_vars/secret_file.yaml
-  roles:
-    - destroyer
