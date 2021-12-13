@@ -2,16 +2,47 @@ terraform {
   required_version = ">=0.15.0" 
 }
 
-provider "aws" {}
+provider "aws" {
+  region = var.region
+}
+
+resource "aws_security_group" "terraform_group" {
+  name  =  "terraform group"
+  description = "Allow postgres and ssh ports"
+  vpc_id = var.vpc
+
+  ingress {
+    description = "Port for database"
+    from_port = 5432
+    to_port = 5432
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Port for EC2, for possible debug"
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    }
+}
 
 resource "aws_db_instance" "mydatabase" {
   allocated_storage      = 10
   identifier             = var.db
-  engine                 = "postgres"
-  engine_version         = "9.6.20"
-  instance_class         = "db.t2.micro"
+  engine                 = var.engine
+  engine_version         = var.engine_ver
+  instance_class         = "db.${var.instance_type}"
   port                   = 5432
-  vpc_security_group_ids = ["sg-0bad191055634fbfa"]
+  vpc_security_group_ids = [aws_security_group.terraform_group.id]
   name                   = var.db
   username               = var.db_user
   password               = var.db_pass
@@ -19,7 +50,7 @@ resource "aws_db_instance" "mydatabase" {
   skip_final_snapshot    = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_rds.yaml --vault-password-file ~./vault_pass.txt --key-file my-key.pem --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
+    command = "ansible-playbook role_for_rds.yaml --vault-password-file ~/.vault_pass.txt --key-file my-key.pem --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
   }
 }
 
@@ -28,7 +59,7 @@ resource "aws_ecs_cluster" "project" {
 }
 
 resource "aws_ecs_task_definition" "user-registration" {
-  family = "app"
+  family                = "app"
   container_definitions = <<DEFINITION
 [
   {
@@ -40,28 +71,32 @@ resource "aws_ecs_task_definition" "user-registration" {
 ]
 DEFINITION
 }
-  
+
+data "template_file" "startup_script" {
+  template = file("${path.cwd}/user_data.sh")
+  vars = {
+    ecs_cluster_name = var.ecs_cluster_name
+  }
+}
+
 resource "aws_instance" "application" {
-  ami           = "ami-007ef488b3574da6b"
-  instance_type = "t2.micro"
-  iam_instance_profile = "EC2_to_ECS"
-  key_name = var.key
-  subnet_id = var.vpc
-  vpc_security_group_ids = ["sg-0bad191055634fbfa"]
-  user_data = <<-EOF
-  #!/bin/bash
-sudo chown -R ec2-user /etc/ecs &&
-echo ECS_CLUSTER="${var.ecs_cluster_name}" >> /etc/ecs/ecs.config
-  EOF
+  ami                    = var.image
+  instance_type          = var.instance_type
+  iam_instance_profile   = "EC2_to_ECS"
+  key_name               = var.key
+  subnet_id              = var.vpc_subnet
+  vpc_security_group_ids = [aws_security_group.terraform_group.id]
+  user_data = data.template_file.startup_script.rendered
 
   # if apllication start works before db is deployed
-  # the it works will be a complete waste of time
+  # then it works will be a complete waste of time
+
   depends_on = [
     aws_db_instance.mydatabase,
   ]
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_ecs.yaml --vault-password-file ~./vault_pass.txt --key-file my-key.pem"
+    command = "ansible-playbook role_for_ecs.yaml --vault-password-file ~/.vault_pass.txt --key-file my-key.pem"
   }
 }
 
