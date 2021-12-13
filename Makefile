@@ -14,7 +14,7 @@ lint-yaml: ## Perform YAML lint
 	
 .PHONY: ansible-check 
 check: ## Ansible syntax check
-	ansible-playbook ecs_graduation_project.yaml destroyer.yaml  --syntax-check --vault-password-file ~/.vault_pass.txt
+	ansible-playbook role_for_ecs.yaml role_for_rds.yaml  --syntax-check --vault-password-file ~/.vault_pass.txt
 
 .PHONY: terraform-check
 	terraform validate
