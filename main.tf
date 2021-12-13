@@ -80,7 +80,7 @@ data "template_file" "startup_script" {
 }
 
 resource "aws_instance" "application" {
-  ami                    = var.image
+  ami                    = var.instance_image
   instance_type          = var.instance_type
   iam_instance_profile   = "EC2_to_ECS"
   key_name               = var.key

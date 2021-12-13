@@ -1,23 +1,47 @@
-variable "db" {}
+variable "db" {
+  default = "mydatabase"
+}
 
-variable "db_user" {}
+variable "db_user" {
+  default = "postgres"
+}
 
-variable "db_pass" {}
+variable "db_pass" {
+  #default = ""
+}
 
-variable "ecs_cluster_name" {}
+variable "ecs_cluster_name" {
+  default = "project"
+}
 
-variable "key" {}
+variable "key" {
+  default = "my-key"
+}
 
-variable "vpc" {}
+variable "vpc" {
+  default = "vpc-d4f5aabc"
+}
 
-variable "vpc_subnet" {}
+variable "vpc_subnet" {
+  default = "subnet-d2c7aaa8"
+}
 
-variable "region" {}
+variable "region" {
+  default = "eu-west-2"
+}
 
-variable "engine" {}
+variable "engine" {
+  default = "postgres"
+}
 
-variable "engine_ver" {}
+variable "engine_ver" {
+  default = "9.6.20"
+}
 
-variable "image" {}
+variable "instance_image" {
+  default = "ami-007ef488b3574da6b"
+}
 
-variable "instance_type" {}
+variable "instance_type" {
+  default = "t2.micro"
+}
