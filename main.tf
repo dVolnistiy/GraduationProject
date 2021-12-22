@@ -6,6 +6,10 @@ provider "aws" {
   region = var.region
 }
 
+data "external" "script" {
+  program = ["bash", "${path.cwd}/get_ip.sh"]
+}
+
 resource "aws_security_group" "terraform_group" {
   name  =  "terraform group"
   description = "Allow postgres and ssh ports"
@@ -16,7 +20,8 @@ resource "aws_security_group" "terraform_group" {
     from_port = 5432
     to_port = 5432
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${data.external.script.result.ip}/32",
+                    "172.31.16.0/20"]
   }
 
   ingress {
@@ -24,7 +29,7 @@ resource "aws_security_group" "terraform_group" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${data.external.script.result.ip}/32"]
   }
 
   egress {
