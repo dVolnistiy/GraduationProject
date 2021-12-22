@@ -21,7 +21,7 @@ resource "aws_security_group" "terraform_group" {
     to_port = 5432
     protocol = "tcp"
     cidr_blocks = ["${data.external.script.result.ip}/32",
-                    "172.31.16.0/20"]
+                    "${var.vpc_sub_cidr}"]
   }
 
   ingress {

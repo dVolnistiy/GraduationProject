@@ -45,3 +45,7 @@ variable "instance_image" {
 variable "instance_type" {
   default = "t2.micro"
 }
+
+variable "vpc_sub_cidr" {
+  default = "172.31.16.0/20"  
+}
