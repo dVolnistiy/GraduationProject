@@ -14,7 +14,7 @@ resource "aws_security_group" "terraform_group" {
   name  =  "terraform group"
   description = "Allow postgres and ssh ports"
   vpc_id = var.vpc
-
+  
   ingress {
     description = "Port for database"
     from_port = 5432
@@ -55,7 +55,7 @@ resource "aws_db_instance" "mydatabase" {
   skip_final_snapshot    = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_rds.yaml --vault-password-file ~/.vault_pass.txt --key-file my-key.pem --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
+    command = "ansible-playbook role_for_rds.yaml --vault-password-file vault_pass.txt --key-file my-key.pem --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
   }
 }
 
@@ -101,8 +101,6 @@ resource "aws_instance" "application" {
   ]
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_ecs.yaml --vault-password-file ~/.vault_pass.txt --key-file my-key.pem"
+    command = "ansible-playbook role_for_ecs.yaml --vault-password-file vault_pass.txt --key-file my-key.pem"
   }
 }
-
-
