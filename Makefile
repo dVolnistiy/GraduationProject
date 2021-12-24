@@ -17,7 +17,12 @@ check: ## Ansible syntax check
 	ansible-playbook role_for_ecs.yaml role_for_rds.yaml  --syntax-check --vault-password-file ~/.vault_pass.txt
 
 .PHONY: terraform-check
+terraform-check: ## Check whether the configuration is valid
 	terraform validate
+
+.PHONY: init
+init: ## Initialize terraform and prepare directory
+	terraform init
 
 .PHONY: plan
 plan: ## Get plan of the project
