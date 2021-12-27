@@ -24,14 +24,13 @@ terraform-check: ## Check whether the configuration is valid
 init: ## Initialize terraform and prepare directory
 	terraform init
 
-# .PHONY: plan
-# plan: ## Get plan of the project
-# 	terraform plan -out=${PWD}/.terraform/terraform.plan
+.PHONY: plan
+plan: ## Get plan of the project
+	terraform plan -out=${PWD}/.terraform/terraform.plan
 
 .PHONY: apply
 create: ## Set up infrastracture
-	terraform apply -auto-approve 
-# ${PWD}/.terraform/terraform.plan
+	terraform apply ${PWD}/.terraform/terraform.plan
 
 .PHONY: list
 list: ## Show a resource in the state
