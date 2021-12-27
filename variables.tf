@@ -23,7 +23,7 @@ variable "vpc" {
 }
 
 variable "vpc_subnet" {
-  default = "subnet-d2c7aaa8"
+  default = "subnet-ed78cba1"
 }
 
 variable "region" {
@@ -47,5 +47,5 @@ variable "instance_type" {
 }
 
 variable "vpc_sub_cidr" {
-  default = "172.31.16.0/20"  
+  default = "172.31.32.0/20"  
 }

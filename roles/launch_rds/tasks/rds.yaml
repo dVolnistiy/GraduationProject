@@ -32,14 +32,14 @@
 
 - name: execute script
   command: "psql {{ db }} -p 5432 -h {{ endpoint }}
-            -f  ~/project/python-postgres-user-registration/postgres/schema.sql
+            -f  python-postgres-user-registration/postgres/schema.sql
             -U postgres"
   environment:
     PGPASSWORD: '{{db_pass}}'
 
 - name: Change app.py to create right Docker image
   lineinfile:
-    path: ~/project/python-postgres-user-registration/app.py
+    path: python-postgres-user-registration/app.py
     regexp: ', host=\"'
     line: 'Database.initialise(database="{{ db }}", user="{{ db_user }}",
            password="{{ db_pass }}", host="{{ item }}")'
@@ -51,7 +51,7 @@
   docker_image:
     name: "{{ image_name }}"
     build:
-      path: ~/project/python-postgres-user-registration
+      path: python-postgres-user-registration
       nocache: true
     state: present
     force_source: true

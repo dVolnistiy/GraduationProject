@@ -25,7 +25,7 @@ resource "aws_security_group" "terraform_group" {
   }
 
   ingress {
-    description = "Port for EC2, for possible debug"
+    description = "Port for EC2, for the possibility of debug"
     from_port = 22
     to_port = 22
     protocol = "tcp"
