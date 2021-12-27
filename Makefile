@@ -27,7 +27,7 @@ init: ## Initialize terraform and prepare directory
 .PHONY: plan
 plan: ## Get plan of the project
 	terraform plan -out=${PWD}/.terraform/terraform.plan
-
+#
 .PHONY: apply
 create: ## Set up infrastracture
 	terraform apply ${PWD}/.terraform/terraform.plan
