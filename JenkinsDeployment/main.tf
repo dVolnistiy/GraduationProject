@@ -11,7 +11,7 @@ data "external" "script" {
 }
 
 resource "aws_security_group" "GroupForJenkins" {
-    name = "JenkinsGroup"
+    name = "JenkinsGroup2"
     description = "allow 22 ssh and 8080 for Jenkins"
     vpc_id = var.vpc
 
@@ -48,7 +48,7 @@ resource "aws_instance" "Jenkins" {
     vpc_security_group_ids = [aws_security_group.GroupForJenkins.id]
 
     tags = {
-        Name = "Jenkins1"
+        Name = "Jenkins2"
     }
 
    provisioner "local-exec" {
