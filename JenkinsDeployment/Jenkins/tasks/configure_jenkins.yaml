@@ -1,0 +1,110 @@
+- name: Update all packages
+  yum:
+    name: '*'
+    state: latest
+    update_only: true
+
+- name: Install yum
+  yum: 
+    name: "{{ packages }}"
+    state: latest
+    update_cache: true
+  vars:
+    packages:
+      - wget
+      - java-1.8.0-openjdk-devel 
+      - amazon-linux-extras
+      - python-pip
+      - lvm2
+      - yum-utils
+      - device-mapper-persistent-data
+      - git-all
+
+- name: Add extras repository
+  command: yum-config-manager --enable extras
+
+- name: Add terraform repo
+  command: yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+
+
+- name: Enable packages from amazon-linux-extras packages
+  shell: "amazon-linux-extras enable python3.8 ansible2 docker postgresql10"
+
+- name: Download Jenkins repo
+  get_url:
+    url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    dest: /etc/yum.repos.d/jenkins.repo
+  
+- name: Import Jenkins key
+  rpm_key: 
+    state: present
+    key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+- name: prepare for install Jenkins
+  command: amazon-linux-extras install epel -y
+
+- name: Install Jenkins
+  yum: 
+    name: jenkins
+    state: present
+
+- name: Start and enable Jenkins
+  systemd:
+    name: jenkins
+    state: started
+    enabled: true
+
+- name: sleep for 15 seconds
+  wait_for: timeout=15
+
+- name: Get init password for Jenkins
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  register: result
+
+- name: Ensure a list of yum packages are installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: true
+  vars:
+    packages:
+    - python3.8
+    - ansible
+    - docker
+    - terraform
+
+- name: Install postgresql10
+  command: amazon-linux-extras install postgresql10 -y
+
+- name: Install docker
+  command: amazon-linux-extras install docker -y
+
+- name: Enable Docker service at startup
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add jenkins to docker group
+  user:
+    name: jenkins
+    group: docker
+    append: true
+
+- name: Upgrade pip3
+  shell: "python3.8 -m pip install pip --upgrade"
+
+- name: Ensure Python pip packages are installed
+  pip:
+    name: "{{ packages }}"
+    executable: /usr/local/bin/pip3.8
+  vars:
+    packages:
+    - boto
+    - boto3
+    - requests
+    - docker
+
+- name: Print init password
+  debug:
+    var: result.stdout

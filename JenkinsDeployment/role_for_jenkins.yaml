@@ -1,0 +1,5 @@
+---
+- hosts: _Name_Jenkins1
+
+  roles:
+    - Jenkins
