@@ -115,6 +115,10 @@
     path: /var/run/docker.sock
     mode: '0666'
 
+- name: install aws ansible-galaxy collection
+  command: ansible-galaxy collection install community.aws
+  become_user: jenkins
+
 - name: Print init password
   debug:
     var: result.stdout
