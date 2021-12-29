@@ -67,4 +67,5 @@
     task_definition: app
     count: 1
     started_by: ansible_user
+    region: "{{ aws_region }}"
   register: task_output
