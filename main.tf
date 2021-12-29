@@ -101,6 +101,6 @@ resource "aws_instance" "application" {
   ]
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_ecs.yaml --vault-password-file vault_pass.txt"
+    command = "ansible-playbook role_for_ecs.yaml --vault-password-file vault_pass.txt -e ansible_python_interpreter=/usr/bin/python3.8"
   }
 }
