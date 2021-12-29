@@ -46,7 +46,7 @@
 - name: Install Jenkins
   yum: 
     name: jenkins
-    state: present
+    state: latest
 
 - name: Start and enable Jenkins
   systemd:
@@ -91,6 +91,11 @@
     group: docker
     append: true
 
+- name: restart jenkins, to get group
+  service:
+    name: jenkins
+    state: restarted
+
 - name: Upgrade pip3
   shell: "python3.8 -m pip install pip --upgrade"
 
@@ -104,6 +109,11 @@
     - boto3
     - requests
     - docker
+
+- name: change permissions of docker.sock
+  file:
+    path: /var/run/docker.sock
+    mode: '0666'
 
 - name: Print init password
   debug:
