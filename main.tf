@@ -55,7 +55,7 @@ resource "aws_db_instance" "mydatabase" {
   skip_final_snapshot    = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook role_for_rds.yaml --vault-password-file vault_pass.txt --extra-vars endpoint=${aws_db_instance.mydatabase.address}"
+    command = "ansible-playbook role_for_rds.yaml --vault-password-file vault_pass.txt --extra-vars endpoint=${aws_db_instance.mydatabase.address} -e ansible_python_interpreter=/usr/bin/python3.8"
   }
 }
 
